@@ -1,4 +1,4 @@
-Cour OpenClassrooms 
+Cours OpenClassrooms 
 ==> Créez des pages web interactives avec JavaScript
 
 
