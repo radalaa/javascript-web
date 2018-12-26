@@ -6,23 +6,20 @@ Activité 2
 // - son titre
 // - son URL
 // - son auteur (la personne qui l'a publié)
-var listeLiens = [
-    {
-        titre: "So Foot",
-        url: "http://sofoot.com",
-        auteur: "yann.usaille"
-    },
-    {
-        titre: "Guide d'autodéfense numérique",
-        url: "http://guide.boum.org",
-        auteur: "paulochon"
-    },
-    {
-        titre: "L'encyclopédie en ligne Wikipedia",
-        url: "http://Wikipedia.org",
-        auteur: "annie.zette"
-    }
-];
+
+
+var contenuElt = document.getElementById("contenu");
+ajaxGet("https://oc-jswebsrv.herokuapp.com/api/liens", function (reponse) {
+    // Transforme la réponse en un tableau d'articles
+    var liens = JSON.parse(reponse);
+
+    liens.forEach(function (lien) {
+      var lienElt = creerElementLien(lien);
+        contenuElt.appendChild(lienElt);
+
+    });
+});
+
 
 // Crée et renvoie un élément DOM affichant les données d'un lien
 // Le paramètre lien est un objet JS représentant un lien
@@ -55,12 +52,7 @@ function creerElementLien(lien) {
     return divLienElt;
 }
 
-var contenuElt = document.getElementById("contenu");
-// Parcours de la liste des liens et ajout d'un élément au DOM pour chaque lien
-listeLiens.forEach(function (lien) {
-    var lienElt = creerElementLien(lien);
-    contenuElt.appendChild(lienElt);
-});
+
 
 // Crée et renvoie un élément DOM de type input
 function creerElementInput(placeholder, taille) {
@@ -104,28 +96,52 @@ ajouterLienElt.addEventListener("click", function () {
             url = "http://" + url;
         }
 
-        // Création de l'objet contenant les données du nouveau lien
+        // Création d'un objet représentant un lien a ajouter
         var lien = {
             titre: titreElt.value,
             url: url,
             auteur: auteurElt.value
         };
+        // Envoi de l'objet au serveur
+        ajaxPost("https://oc-jswebsrv.herokuapp.com/api/lien", lien,
 
-        var lienElt = creerElementLien(lien);
-        // Ajoute le nouveau lien en haut de la liste
-        contenuElt.insertBefore(lienElt, contenuElt.firstChild);
+            function (reponse) {
+            // Le film est affiché dans la console en cas de succès
+            console.log("Le lien " + JSON.stringify(lien) + " a été envoyé au serveur");
+            //appler la function addNewElt pour afficher le lien ajouté en cas de succès . 
+            addNewElt();
+            //appler la function pour afficher le message en cas de succès . 
+            messageSuccess();
+             },
 
+            true // Valeur du paramètre isJson
+
+        );
+
+
+       function addNewElt(){
+            var lienElt = creerElementLien(lien);
+            // Ajoute le nouveau lien en haut de la liste
+            contenuElt.insertBefore(lienElt, contenuElt.firstChild);
+
+            
+       }
         // Remplace le formulaire d'ajout par le bouton d'ajout
-        p.replaceChild(ajouterLienElt, formAjoutElt);
+            p.replaceChild(ajouterLienElt, formAjoutElt);
 
         // Création du message d'information
-        var infoElt = document.createElement("div");
-        infoElt.classList.add("info");
-        infoElt.textContent = "Le lien \"" + lien.titre + "\" a bien été ajouté.";
-        p.insertBefore(infoElt, ajouterLienElt);
-        // Suppresion du message après 2 secondes
-        setTimeout(function () {
+       
+        function messageSuccess() {
+            var infoElt = document.createElement("div");
+            infoElt.classList.add("info");
+            infoElt.textContent = "Le lien \"" + lien.titre + "\" a bien été ajouté.";
+            p.insertBefore(infoElt, ajouterLienElt);
+            // Suppresion du message après 2 secondes
+            setTimeout(function () {
             p.removeChild(infoElt);
-        }, 2000);
+            }, 2000);
+        };
     });
 });
+
+
